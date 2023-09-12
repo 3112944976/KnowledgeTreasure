@@ -1,0 +1,58 @@
+1、进程与线程的详细解释：
+#详见https://www.cnblogs.com/lanyinhao/p/9223301.html
+#进程和线程都是通过函数来具体实现的。
+#线程中是没有线程id的概念的，但线程有名字。
+
+#一个线程只能属于一个进程，而一个进程可以有多个线程，但至少有一个线程。
+#资源分配给进程，同一进程的所有线程共享该进程的所有资源。
+#处理机分给线程，即真正在处理机上运行的是线程。
+#线程作为调度和分配的基本单位，进程作为拥有资源的基本单位。
+#进程是拥有资源的一个独立单位，线程不拥有系统资源，但可以访问隶属于进程的资源。
+#不仅进程之间可以并发执行，同一个进程的多个线程之间也可并发执行。
+进程：是计算机中的程序关于其中所需要的的数据集合的活动，是os结构的基本单位
+线程：轻量级的进程，同一个进程中包含多个线程
+
+2、常用要导入的模块
+1>from multiprocessing import Process:进程模块
+2>import os:操作系统模块
+3>import time:时间模块
+4>import threading:线程模块
+
+5>from multiprocessing import Pool:进程池模块
+6>import threadpool:线程池模块
+
+3、进程常用的代码：
+1> os.getpid():得到该代码块的进程id。
+2> p = Process(target = [子进程函数名], args = ('test', ))：(在主函数中使用)，进行实例化操作
+3> p.start():(在主函数中使用)
+4> p.join()# 等待进程或线程结束(在主函数中使用)
+5> time.sleep(3):操作系统停顿3s(在主函数中使用)
+6> pr.terminate()  # 关闭进程,不会立即关闭,有个等着操作系统去关闭这个进程的时间(在主函数中使用)
+
+4、线程常用的代码：
+1>threading.current_thread().name:返回该线程的名字name。
+2> t = threading.Thread(target = top3, name = str(i), args = (data_set[i], ))):线程的实例化创建
+3>t.start()
+4>t.join()
+
+5、进程池：
+#进程多了会导致上下文切换的问题(代码管理成本增加)。
+#而进程池就是在主函数的进程中编写一些限制（开始工作的进程量）。
+1> p = Pool(4) #限制进程池里同时最多跑的进程个数
+
+6、线程池：(扩展模块)
+#详情可见：https://www.cnblogs.com/xiaozi/p/6182990.html
+#步骤：
+1>定义线程函数
+2>将创建多个任务put到线程池中--threadpool.makeRequests()
+eg:
+pool = threadpool.ThreadPool(os.cpu_count()) #定义cpu的单个线程的运行时间为随机。
+tasks = threadpool.makeRequests([线程函数名], list[参数])#编写线程任务集
+[pool.putRequest(task)  for task in tasks]
+3>等待所有任务处理完毕 ---threadpool.wait
+eg:
+pool.wait()
+
+7、应用汇集
+1>#多线程的应用例如在100万个数中找到最大的100个数， MapReduce的做法(详见lesson5文件和进程的倒数第二个代码块)
+2>多线程变量共享(详见lesson5文件和进程的倒数第一个代码块)

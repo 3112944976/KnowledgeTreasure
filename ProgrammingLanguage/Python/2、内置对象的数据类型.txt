@@ -1,0 +1,29 @@
+1、常用的内置对象（数据类型）
+（1）int,float,complex,str（r' '）,bytes(b' '),list,tuple,dict,set,frozenset,bool
+（2）文件：f = open('data.txt', 'rb')
+	open是内置函数，使用指定的模式打开文件，返回文件对象。
+（3）其他迭代对象：（可理解为表示数据流的对象，每次返回一个数据）
+	生成器对象、range对象、zip对象、enumerate对象、map对象、filter对象。
+	# 这些对象大多有惰性求值的特点，操作方法也与Python常见序列相似。
+2、常,变量的赋值应用
+（1）声明类型（无此步骤）
+（2）定义变量名并初始化赋值
+（3）引用	
+3、数字
+（1）避免实数间的直接相等性测试（存在误差），而是以两者之差的绝对值的是否足够小为判断依据。
+（2）复数:
+	计算复数的模：abs()、实部：x.real()、虚部：x.imag()、共轭复数：x.conjugate()
+（3）在数字之间使用_是为了表示分隔，提高数字的可读性。
+（4）分数：from fractions import Fraction(Fraction对象支持分数运算)
+	x = Fraction(1,2) = 1/2
+	x.numerator  # 查看分子
+	x.denominator  # 查看分母
+（5）高精度实数：from fractions import Decimal
+	>>>1/9
+	>>>0.1111111111111
+	>>>Decimal(1/9)
+	>>>Decimal('0.11111111111111111111234543')
+（6）str and bytes
+	type()  # 可查看对象的类型
+	'hello world'.encode(('utf-8'/'gbk'))  # str -> bytes
+	(b'hello world'/_).decode(('utf-8'/'gbk))  # bytes -> str

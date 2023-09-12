@@ -1,0 +1,132 @@
+1、基本概论
+	NumPy支持大量的维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库。eg:切片查看、修改、赋值，比较，重构造，运算。
+	Nupmy可用来存储和处理大型矩阵，比Python自身的嵌套列表（nested list structure)结构要高效的多（该结构也可以用来表示矩阵（matrix））。
+	NumPy是运行速度非常快的数学库(用C编写的库),主要用于数组计算,包含:ndarray;广播功能函数;线性代数,傅里叶变换,随机数生成等功能。
+2、重要的全局概论
+	1>dtype：
+		#可以查看数组中数值的类型:[实例对象名].dtype
+		#参数 dtype='' 在许多np内置的函数中都可以作为位置形参来使用,
+		#同时也有 dtype = [实例对象名] 的用法，会自动去取得对象数组的类型，不用我们知道对象的值类型。
+	2>切片与赋值：
+		#N维数组支持切片操作，来查看数组的值、修改数组的值。
+			#eg1:a[np.arange(4),array[1,2,3,4]] == a[0,1] a[1,2] a[2,3] a[3,4]
+			#eg2:a[[0,1,2],[0,1,0]] == a[0,0] a[1,1] a[2,0]
+		#数组的值可以赋值给对象，涉及到对象间的赋值时，会出现浅拷贝和深拷贝现象。
+3、常用的方法及函数
+	01、numpy的导入：import numpy as np
+	02、numpy数组的创建: [实例化对象] = numpy.array( object ,  dtype = None , ndmin = 0 ,copy = True , order = None ,  subok = False )
+		#object:list/tuple或者嵌套的list/tuple。dtype:指定数值类型。ndmin:指定N维数组的最小规模。order：C:行优先创建数组，F:列优先创建数组。
+	03、[实例对象名].ndim：查看数组的维度
+	04、[实例对象名].shape：查看数组的行列数：--->([行数],[列数])
+		#获取数组的列数/行数:[实例对象名].shape[1/0]
+		#也可以用于调整数组维度规模大小： [实例对象名].shape = (int_x, int_y)。
+	05、[实例化对象].itemsize:这一数组属性返回数组中每个元素的字节单位长度
+	06、[实例化对象].mat(x):创建矩阵，将list/tuple等类型的对象x转换为矩阵。
+	07、[实例对象名] = np.zeros(([行数]，[列数])):创建一个值全为0矩阵数组
+	08、[实例对象名] = np.ones(([行数]，[列数])):创建一个值全为1矩阵数组
+	09、[实例对象名] = np.eye(N,M=None,k=1,dtype=<class 'float'>,order='C):创建一个对角线且Key值为1的矩阵数组
+		#N：行数，M：列数，k:key值，dtype：值得类型，order：... ...
+
+	10、[实例对象名] = np.random.random(([行数]，[列数])):创建任意值的，规定规模的矩阵数组。
+	11、[实例对象名] = np.empty(([n维度列表值:x,y,z...]，dtype = int)):创建任意值的，规定规模的矩阵数组。
+
+	12、[实例对象名] = np.arange([起始值],[终点值],[步长])):返回一个有终点和起点的固定步长的排列数组。
+	13、使用astype转换数据类型
+		#[新实例对象名] = [旧实例对象名].astype(dtype = np.float64/[实例对象名]):将数值转换为float型
+		#这样的数值类型转换，会出现数值精度丢失的问题。
+		#基本数值类型和引用数值类型之间的强制转化，会出现错误。
+
+	14、[实例对象名].reshape(x,y,z,... ...)：指定任意维度将数组切分入高维数组中。
+
+	15、[实例对象名].transpose(0,1,2):x,y,z轴对应数值的转换。
+		#x轴用0表示，y轴用1表示，z轴用2表示。
+		#在该函数中的参数只能使用0/1/2/... ...
+		#0,1,2->0,2,1:2*4*3->2*3*4
+		#.transpose():具有矩阵转置的作用
+	16、[实例对象名].swapaxes(1,2)：1维与2维交换位置
+		#与2.15功能相似
+	17、np.sum([实例对象名]):求该对象矩阵的值和
+		#print(np.sum(x, axis = 0))：按列计算，返回每一列的值和。
+		#print(np.sum(x, axis = 1))：按行计算，返回每一行的值和。
+		#把矩阵映射到axis轴上，可以理解为消掉axis轴。0 - x轴，1- y轴。
+	?18、np.mean()
+	?19、[实例对象名].cumsum()
+		#print(x.cumsum(axis = 0)):按行累加
+		#print(x.cumsum(axis = 1)):按列累加
+		#详见In[94]
+	?20、[实例对象名].cumprod()
+		#print(x.cumprod(axis = 0))#按行累加
+		#print(x.cumprod(axis = 1))#按列累加
+		##详见In[95]
+	21、[实例对象名].sort([1]/axis = 0/1):矩阵排序
+		#key = 1:在y维上排序，即按行排序
+		#key = 0:在x维上排序，即按列排序
+	22、[实例对象名] = np.embpty_like(x)：copy x给新建的对象。
+	23、[实例对象名].repeat([a, b, c... ...],axis = 0/1... ...):将对象数组按照形参列表按顺序重复。
+		#a=array([0,1]) a.repeat(3)-->array([0,0,0,1,1,1])
+		#a=array([0,1]) a.repeat(2,3)-->array([0,0,1,1,1])
+	24、np.tile([arr,2,axis = 0/1... ...):贴瓷砖
+		#a=array([0,1]) np.tile(a,(2, ))-->array([0,1] [0,1])
+	25、[实例对象名].size :返回N维数组的元素个数
+	26、np.random.shuffle([实例对象名]):打乱N维数组内元素的顺序
+	27、.tolist()：数组转换为列表
+
+
+4、数组的比较
+	1>使用逻辑符号的比较方法[实例对象名] = ([实例对象名:含有数值对象] > 2)：返回值为boolean类型的数组。通过>2实现判断。
+	2>切片+逻辑筛选：[实例对象名:含有数值对象][a > 2] == [实例对象名] = ([实例对象名:含有数值对象] > 2),print( [实例对象名])
+
+5、数学运算
+	1>x.dot(y)/np.dot(x,y):x与y内积
+		#运算规则详见:https://www.cnblogs.com/Shawnyi/p/10370815.html
+	2>x.T:对x矩阵转置
+	3>np.add(x,y):x与y矩阵相加
+	4>np.subtract(x,y):x与y矩阵相减
+	5>np.multiply(x,y)/:x与y矩阵相乘
+		#x与y数组必须维数相同，否则会出现错误。
+	6>np.divide(x,y):x与y矩阵相除
+	7>np.sqrt(x):x矩阵值的平方根运算
+
+6、broadcasting(广播)：
+#一维数组是列向量，按照列的方式排组，所以其shape的结果是(x,)
+#当矩阵间进行数学运算时，比如加法运算，且两个矩阵的维度不同。此时维度小的矩阵会进行：自动复制并强制填充至同高纬度的操作。然后实现运算。
+
+7、逻辑运算
+	1>np.where([实例对象名] > 0, 1, -1):
+		#数组对象中值若大于0，则建值为1，否则为-1，最终返回一个值为boolean型的数组。
+		#1/-1也可以分别取数组对象。
+
+?8、部分高级的ndarry处理
+	1>reshape改变tensor形状：
+		#[实例对象名]。reshape(a, b):重构行列值
+		#若a<0,a失效，则去看b去按列排列。
+	2>连接两个n维数组：
+		#np.concatenate([arr1,arr2], axis = 0)
+		# axis = 0:按照行来组排
+		#垂直的组合拼接：np.vstack((arr1, arr2))
+		#水平的组合拼接:np.hstack((arr1, arr2))
+	3>拆分数组：
+		#a, b, c = np.split(arr, [a, b], axis = 0)
+		#[a,b]指的是在a行及b行下拆分
+		#水平的组合分割:np.vsplit（arr, 3)
+		#垂直（按列）的组合分割:np.vsplit（arr, 3)
+	4>堆叠辅助：
+		#r_用于按行堆叠：np.r_[arr1, arr2] == np.vstack((arr1, arr2))
+		#_用于按列堆叠：(np.c_[np.r_[arr1, arr2], arr] == np.hstack((arr1, arr2))
+	5>将高纬数组拉平：arr.ravel()：arr--->[0 1 2 3... ...]
+
+9、numpy的文件输入和输出
+	1、读取csv文件作为数组：
+		loadtxt(fname, dtype=<class 'float'>, comments='#', delimiter=None, converters=None, skiprows=0, usecols=None, unpack=False, ndmin=0)
+			#fname要读取的文件、文件名、或生成器。
+			#dtype数据类型，默认float。
+			#comments注释。
+			#delimiter分隔符，默认是空格。
+			#skiprows跳过前几行读取，默认是0，必须是int整型。
+			#usecols：要读取哪些列，0是第一列。例如，usecols = （1,4,5）将提取第2，第5和第6列。默认读取所有列。
+			#unpack如果为True，将分列读取。。
+	2、保存文件：
+		#arr = np.savez("array_archive.npz", arr = arr, b = arr2, c = arr3)
+		#np.save('some_arrary', arr)
+	3、
+		

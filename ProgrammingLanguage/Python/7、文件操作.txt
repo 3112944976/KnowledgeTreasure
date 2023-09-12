@@ -1,0 +1,43 @@
+1、文件访问权限：r = read ,w = write, a = append , b = binary
+
+2、几种简单的文件访问及修改操作代码样式：
+texts = ['New Line #1 hello world', 'Line #2 life is not easy']
+
+with open("new_sample.txt","w+") as f:  # 文件中覆盖式添加内容
+    for text in texts:
+        f.write(text + '\n')
+        print(text.strip())
+        
+with open("new_sample.txt", 'a+') as f:  # 文件中追加内容操作
+    f.write('Something new \n')
+    
+with open("new_sample.txt", 'r') as f:  # 标准读取文件内容操作
+    for line in f.readlines():
+        print(line.strip())
+
+3、json文本的读取（需要导入内置库：json）
+# json中处理的str必须使用“”来组织。
+#形如：'{"ip": "192.168.1.1"}'这样的对象或者含有这样内容的文件，都可以认为是序列化后的json文本对象（类型为:str）内容。
+
+config = {'ip':'192.168.1.1', 'port':['9100', '9101', '9102']}
+# 序列化操作
+with open('config.json', 'w+') as f:
+    json.dump(config, f) #把字典写入json文件，传入了文件句柄
+# 反序列化操作
+with open('config.json', 'r') as f:
+    new_config = json.load(f) #把json文件对象变成字典对象
+print(new_config)
+
+4、csv读取文件（需要导入内置库：csv）
+#小知识:
+csv是(逗号分隔值)的英文缩写,csv文件是一种用来存储数据的纯文本文件,通常都是用于存放电子表格或数据的一种文件格式。csv格式文件可以用Excel来打开,但是由于计算机档案数据转换的原因,会将其CRC之数值改做科学记号方式储存。
+
+#使用with语句来访问及操作csv文件。
+#使用:a = csv.reader(f) b = next(a)来读取表格中第一行的数据。
+#使用:f.readline()来实现对表格数据的行读取。
+
+5、序列化和反序列化内置模块：pickle
+#含有dump(s)/load(s)等函数方法的操作
+#详情见lesson5文件和进程：序列化和反序列。
+
+

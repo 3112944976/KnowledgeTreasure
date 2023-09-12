@@ -1,0 +1,57 @@
+1、类型转换
+（1）bin()、oct()、hex():10进制->2,8,16进制
+（2）	int(56.0)->56
+	int('0x22b', 16)  # 把非十进制数转换为整型的时候，要声明其数的进制。
+	inf == 无穷大
+
+（3）ord() and chr():
+	ord('a') ->97  # 查看指定字符的Unicode编码(其由数字来组成，可以参与运算)
+	chr(65) ->'A'  # 返回数字65对应的字符
+	chr(ord('国') + 1) ->'图'
+（4）ascii('a') ->"'a'"  # 把对象转换为ASCII编码
+（5）list(),tuple(),str(),dict(),set(),frozenset()...
+
+2、数据类型查看及判断
+	type(3)
+	isinstance(3, int)
+
+3、max(),min(),sum()
+	max(['2','3'], key=len)
+
+4、input() and print():
+（1）input:
+	x = input('Please input:') ->Please input: 567
+（2）print:
+	print(value1,value2,...,sep='',end='\n',file=sys.stdout,flush=False)
+	#  sep用以指定value（1-n）之间的分隔符，end=''时表示输出每一个结果后不换行，flie用来指定结果输出的位置
+		# with open('text.txt','a+') as fp:
+			print('hello world', file = fp)
+
+5、排序
+（1）sorted（）：对可迭代对象进行排序
+	sorted(x,key=lambda item:len(str(item)),reverse=True)  # reverse = True:降序，false：升序
+（2）.sort：对列表对象进行排序
+
+6、枚举：enumerate()
+list(enumerare('ab'))->[(0,'a'),(1,'b')]
+
+7、map(),reduce(),filter()
+	list(map(str,range(3))->['0','1','2']
+	
+	from funtools import reduce
+	reduce(lambda x,y:x+y,[1,2,3,4,5,6,7,8,9])->45  # 递归函数（迭代累计运算原理）
+
+	list(filter(lambda x:x.isalnum(),['a','b','23','?/'])->['a','b','23']  # .isalnum()测试是否为字符或者数字
+
+8、range()  # [x,y)
+(1)range(stop)
+(2)range(start,stop)
+(3)range(start,stop,step)
+
+9、zip()  #缝合压缩函数
+zip('abdc',[1,2,3,4],'.?!')->('a',1,.),('b',2,?)... ...
+
+10、eval()用来计算字符串及字节串的值
+  #不允许str中以0开头，会报错。
+  #eval()函数不对参数字符串进行安全性检查，会引发安全性漏洞。而literal_eval()解决了这个问题。
+	eval('3+5')->8
