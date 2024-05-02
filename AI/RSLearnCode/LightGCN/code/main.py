@@ -103,7 +103,10 @@ def main():
     )
 
     # Initialize wandb
-    wandb.init(project=world.WANDB_PROJECT, entity=world.WANDB_ENTITY,
+    # wandb.init(project=world.WANDB_PROJECT, entity=world.WANDB_ENTITY,
+    #            config=world.config, reinit=True, name=wandb_run_name,
+    #            tags=["latest"])
+    wandb.init(project=world.WANDB_PROJECT,
                config=world.config, reinit=True, name=wandb_run_name,
                tags=["latest"])
     wandb.watch(model)
