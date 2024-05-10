@@ -201,6 +201,7 @@ class LightGCN:
         return rating
 
 
+# 通过注意力机制考虑嵌入组合权重ak
 class BaseAttention(LightGCN):
     """
     Light Graph Convolutional Network (LightGCN) model with a simple attention 
@@ -217,13 +218,14 @@ class BaseAttention(LightGCN):
     def __init__(self, config, dataset):
         """
         Initialize the BaseAttention model.
-
         Args:
             config (dict): Configuration parameters for the model.
             dataset (BasicDataset): The dataset containing user-item 
                                     interactions.
         """
+        # 调用了父类LightGCN的构造函数，以初始化继承的属性
         super().__init__(config, dataset)
+        # 创建一个可训练参数attention_weights
         self.attention_weights = torch.nn.Parameter(
             torch.randn(config["lightGCN_n_layers"] + 1),
             requires_grad=True
@@ -232,7 +234,6 @@ class BaseAttention(LightGCN):
     def forward(self):
         """
         Forward pass of the BaseAttention model.
-
         Returns:
             tuple: A tuple of all users' embeddings and all items' embeddings.
         """
@@ -240,7 +241,6 @@ class BaseAttention(LightGCN):
         items_emb = self.embedding_item.weight
         all_emb = torch.cat([users_emb, items_emb])
         embs = [all_emb]
-
         if self.config["dropout"]:
             if self.training:
                 print("Dropping.")
@@ -261,13 +261,15 @@ class BaseAttention(LightGCN):
             else:
                 all_emb = torch.sparse.mm(g_droped, all_emb)
             embs.append(all_emb)
-        embs = torch.stack(embs, dim=1)
+        # 将embs中的嵌入向量沿着新的维度（维度1）进行堆叠
+        embs = torch.stack(embs, dim=1)  # embs_size: (num_users+num_items, 5, latent_dim)
 
         if self.config["save_embs"]:
             self.embs = embs
 
         # Attention Mechanism
         attention_scores = F.softmax(self.attention_weights, dim=0)
+        # attention_scores_size: (1, 5, 1), light_out_size: (num_users+num_items, 1, latent_dim)
         light_out = torch.sum(embs * attention_scores.view(1, -1, 1), dim=1)
 
         all_users_embeddings, all_items_embeddings = torch.split(
@@ -277,41 +279,32 @@ class BaseAttention(LightGCN):
 
     def parameters_norm(self):
         """
-        Compute the norm of the model"s parameters.
-
+        计算模型参数的范数：模型参数范数 = 范数(W1) + 范数(b1) + 范数(W2) + 范数(b2)
         Returns:
             float: The norm of the model"s parameters.
         """
+        # attention_weights的L2范数：self.attention_weights.norm(2).pow(2)
+        # 父类中模型参数的范数：super().parameters_norm()
         return super().parameters_norm() + \
             self.attention_weights.norm(2).pow(2)
 
 
+# 通过注意力机制考虑用户和物品的最终嵌入表征embs
 class FinerAttention(LightGCN):
     """
     Light Graph Convolutional Network (LightGCN) model with a finer attention
     mechanism.
-
     Args:
         config (dict): Configuration parameters for the model.
         dataset (BasicDataset): The dataset containing user-item interactions.
 
     Attributes:
-        attention_weights_users (torch.nn.Parameter): Attention weights
-                                                      parameter for users.
-        attention_weights_items (torch.nn.Parameter): Attention weights
-                                                      parameter for items.
+        attention_weights_users (torch.nn.Parameter): Attention weights parameter for users.
+        attention_weights_items (torch.nn.Parameter): Attention weights parameter for items.
     """
-
     def __init__(self, config, dataset):
-        """
-        Initialize the FinerAttention model.
-
-        Args:
-            config (dict): Configuration parameters for the model.
-            dataset (BasicDataset): The dataset containing user-item
-                                    interactions.
-        """
         super().__init__(config, dataset)
+        # 创建可训练参数attention_weights_users及attention_weights_items,size=(n_layers+1,)
         self.attention_weights_users = torch.nn.Parameter(
             torch.randn(config["lightGCN_n_layers"] + 1),
             requires_grad=True)
@@ -321,10 +314,7 @@ class FinerAttention(LightGCN):
 
     def forward(self):
         """
-        Forward pass of the FinerAttention model.
-
-        Returns:
-            tuple: A tuple of all users" embeddings and all items" embeddings.
+        Returns:tuple: A tuple of all users" embeddings and all items" embeddings.
         """
         users_emb = self.embedding_user.weight
         items_emb = self.embedding_item.weight
@@ -356,18 +346,16 @@ class FinerAttention(LightGCN):
         if self.config["save_embs"]:
             self.embs = embs
 
-        # Calculate the softmax
-        attention_scores_users = F.softmax(
-            self.attention_weights_users, dim=0).view(1, -1, 1)
-        attention_scores_items = F.softmax(
-            self.attention_weights_items, dim=0).view(1, -1, 1)
+        # 通过softmax标准化注意力权重的取值，并重塑尺寸为(1,n_layers+1,1)
+        attention_scores_users = F.softmax(self.attention_weights_users, dim=0).view(1, -1, 1)
+        attention_scores_items = F.softmax(self.attention_weights_items, dim=0).view(1, -1, 1)
 
-        # Create block diagonal attention matrix
+        # 拼接用户和项目的注意力分数，并重塑为与嵌入向量相同的形状
         attention_scores = torch.cat([
             attention_scores_users.repeat(self.num_users, 1, 1),
             attention_scores_items.repeat(self.num_items, 1, 1)], dim=0)
 
-        # Compute weighted sum in one step
+        # 计算加权和，将嵌入向量与注意力分数相乘，并在特定维度上进行求和。
         light_out = torch.sum(embs * attention_scores, dim=1)
 
         all_users_embeddings, all_items_embeddings = torch.split(
@@ -387,22 +375,14 @@ class FinerAttention(LightGCN):
             self.attention_weights_items.norm(2).pow(2)
 
 
+# 具有缩放点积注意力机制的 LightGCN 模型
 class ScaledDotProductAttentionLightGCN(LightGCN):
     """
-    Light Graph Convolutional Network (LightGCN) model with scaled dot-product 
-    attention.
-
-    Args:
-        config (dict): Configuration parameters for the model.
-        dataset (BasicDataset): The dataset containing user-item interactions.
+    Light Graph Convolutional Network (LightGCN) model with scaled dot-product attention.
     """
-
     def forward(self):
         """
-        Forward pass of the ScaledDotProductAttentionLightGCN model.
-
-        Returns:
-            tuple: A tuple of all users" embeddings and all items" embeddings.
+        Returns:tuple: A tuple of all users" embeddings and all items" embeddings.
         """
         users_emb = self.embedding_user.weight
         items_emb = self.embedding_item.weight
@@ -449,8 +429,7 @@ class ScaledDotProductAttentionLightGCN(LightGCN):
 
     def prepare_attention_inputs(self, embs):
         """
-        Prepare inputs for the attention mechanism.
-
+        将嵌入向量作为查询、键和值。自注意力机制。
         Args:
             embs (torch.Tensor): Embeddings tensor.
 
@@ -462,29 +441,30 @@ class ScaledDotProductAttentionLightGCN(LightGCN):
     @staticmethod
     def compute_attention(queries, keys, values):
         """
-        Compute the scaled dot-product attention.
-
+        计算缩放点积注意力
         Args:
             queries (torch.Tensor): Queries tensor.
             keys (torch.Tensor): Keys tensor.
             values (torch.Tensor): Values tensor.
-
         Returns:
             torch.Tensor: The attention output tensor.
         """
+        # 计算缩放因子，即：查询向量Q维度的平方根
         scaling_factor = math.sqrt(queries.size(-1))
-        attention_scores = torch.matmul(
-            queries, keys.transpose(-2, -1)) / scaling_factor
+        # 计算注意力分数，即：Q与K点积，然后除以缩放因子
+        attention_scores = torch.matmul(queries, keys.transpose(-2, -1)) / scaling_factor
+        # 将注意力分数应用 softmax 函数，得到注意力权重。
         attention_weights = F.softmax(attention_scores, dim=-1)
+        # 使用注意力权重对值向量进行加权求和，得到最终的注意力输出。
         attention_output = torch.matmul(attention_weights, values)
         return attention_output
 
 
+# 带有线性投影到嵌入空间的缩放点积注意力机制的 LightGCN 模型。
 class WeightedScaledDotProductAttentionLightGCN(ScaledDotProductAttentionLightGCN):
     """
     ScaledDotProductAttentionLightGCN model with linear projections to
     embeddings.
-
     Args:
         config (dict): Configuration parameters for the model.
         dataset (BasicDataset): The dataset containing user-item interactions.
@@ -500,8 +480,9 @@ class WeightedScaledDotProductAttentionLightGCN(ScaledDotProductAttentionLightGC
                                     interactions.
         """
         super().__init__(config, dataset)
-        self.latent_dim = self.config["latent_dim_rec"]
-        self.attention_dim = self.config.get("attention_dim", 1)
+        self.latent_dim = self.config["latent_dim_rec"]  # 从配置中读取嵌入维度
+        self.attention_dim = self.config.get("attention_dim", 1)  # 从配置中读取注意力维度，默认为1
+        # 创建三个线性投影层，分别用于将嵌入向量投影到查询、键和值空间
         self.query_projection = nn.Linear(
             self.latent_dim, self.attention_dim, bias=False)
         self.key_projection = nn.Linear(
@@ -510,15 +491,8 @@ class WeightedScaledDotProductAttentionLightGCN(ScaledDotProductAttentionLightGC
             self.latent_dim, self.attention_dim, bias=False)
 
     def prepare_attention_inputs(self, embs):
-        """
-        Prepare inputs for the attention mechanism.
-
-        Args:
-            embs (torch.Tensor): Embeddings tensor.
-
-        Returns:
-            tuple: A tuple of queries, keys, and values.
-        """
+        """准备注意力机制的输入"""
+        # 对嵌入向量进行查询、键和值的投影，得到查询、键和值。
         queries = self.query_projection(embs)
         keys = self.key_projection(embs)
         values = self.value_projection(embs)

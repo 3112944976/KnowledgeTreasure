@@ -37,16 +37,15 @@ class PureMF(BasicModel):
             dataset (Dataset): The dataset containing user-item interactions.
         """
         super(PureMF, self).__init__()
-        self.num_users = dataset.n_users
+        self.num_users = dataset.n_users  # 初始化了用户和物品数及嵌入维数
         self.num_items = dataset.m_items
         self.latent_dim = config["latent_dim_rec"]
         self.sigmoid = nn.Sigmoid()
-        self.__init_weight()
+        self.__init_weight()  # 初始化嵌入矩阵权重
 
     def get_embedding_matrix(self):
         """
-        Get the embedding matrix for users and items.
-
+        获取用户和物品的嵌入矩阵
         Returns:
             torch.Tensor: The embedding matrix of shape
                           (num_users + num_items, 1, latent_dim).
@@ -58,8 +57,7 @@ class PureMF(BasicModel):
 
     def __init_weight(self):
         """
-        Initialize the user and item embedding weights using a normal 
-        distribution (N(0, 1)).
+        初始化用户和物品嵌入矩阵权重，使其服从N(0, 1)的正态分布。
         """
         self.embedding_user = torch.nn.Embedding(
             num_embeddings=self.num_users, embedding_dim=self.latent_dim)
@@ -69,7 +67,7 @@ class PureMF(BasicModel):
 
     def get_user_rating(self, users):
         """
-        Get the predicted ratings for a given list of users.
+        给定用户列表，获取对应用户的预测评分
 
         Args:
             users (torch.Tensor): Tensor containing user indices.

@@ -1,13 +1,3 @@
-"""
-Created on Mar 1, 2020
-Pytorch Implementation of LightGCN in
-Xiangnan He et al.
-LightGCN: Simplifying and Powering Graph Convolution Network for Recommendation
-
-@author: Jianbai Ye (gusye@mail.ustc.edu.cn)
-
-Define models here
-"""
 from torch import nn
 import torch
 
@@ -28,8 +18,8 @@ class BasicModel(nn.Module):
 
     def get_user_rating(self, users):
         """
-        Should return the ratings for the given users.
-
+        抽象方法，用于获取给定用户的评分。
+        子类中必须实现这个方法，或者抛出NotImplementedError异常。
         Args:
             users: The users for whom to retrieve ratings.
         """
@@ -37,6 +27,6 @@ class BasicModel(nn.Module):
 
     def parameters_norm(self):
         """
-        Returns the norm of the parameters in the model.
+       计算模型参数的范数（norm），这里仅返回一个零张量，在子类中可以按需重写。
         """
         return torch.tensor(0)
