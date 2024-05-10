@@ -1,7 +1,7 @@
 import torch
-from .. import utils
-from .. import world
-from ..utils import Timer
+import utils
+import world
+from utils import Timer
 from tqdm import tqdm
 
 

@@ -1,5 +1,5 @@
 from .BasicModel import BasicModel
-from ..datasets import BasicDataset
+from datasets import BasicDataset
 from torch import nn
 import torch.nn.functional as F
 import scipy.sparse as sp

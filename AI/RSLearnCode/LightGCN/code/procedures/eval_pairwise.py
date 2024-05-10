@@ -1,6 +1,6 @@
 import multiprocessing
-from .. import utils
-from .. import world
+import utils
+import world
 import numpy as np
 import torch
 

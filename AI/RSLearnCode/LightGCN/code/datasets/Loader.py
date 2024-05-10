@@ -1,5 +1,5 @@
 from .BasicDataset import BasicDataset
-from .. import world
+import world
 import numpy as np
 from scipy.sparse import csr_matrix
 from collections import defaultdict

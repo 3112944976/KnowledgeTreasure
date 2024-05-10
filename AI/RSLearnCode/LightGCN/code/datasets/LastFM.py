@@ -5,8 +5,8 @@ from scipy.sparse import csr_matrix
 import pandas as pd
 import numpy as np
 import torch
-from .. import utils
-from .. import world
+import utils
+import world
 
 
 class LastFM(BasicDataset):
