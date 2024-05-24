@@ -65,7 +65,7 @@ def parse_args():
                         help="more params for the scheduler in JSON format")  # 指定调度器额外参数，以JSON格式提供
 
     # 设置注意力机制中注意力投影的维度，默认为2
-    parser.add_argument("--attention_dim", type=int, default=2,
+    parser.add_argument("--attention_dim", type=int, default=8,
                         help="Number of dims for the attention projections")
 
     # APPNP

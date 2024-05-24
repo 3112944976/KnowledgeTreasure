@@ -47,39 +47,32 @@ def uniform_sample_original(dataset, neg_ratio=1):
     return samples
 
 
+# 负样本采样
 def uniform_sample_original_python(dataset):
-    """
-    The original implementation of BPR Sampling in LightGCN.
-
-    Args:
-        dataset (BasicDataset): The dataset object.
-
-    Returns:
-        np.array: Array of sampled negative items.
-    """
+    # 获取用户数量user_num
     user_num = dataset.train_data_size
+    # 从用户总数中随机选择若干用户users
     users = np.random.randint(0, dataset.n_users, user_num)
     all_pos = dataset.all_pos
     samples = []
-
     for user in users:
+        # 对于每个随机选择的用户，获取其所有的正例项目
         pos_for_user = all_pos[user]
 
         if len(pos_for_user) == 0:
             continue
-
+        # 从其正例项目中随机选择一个正样本pos_item
         pos_index = np.random.randint(0, len(pos_for_user))
         pos_item = pos_for_user[pos_index]
-
+        # 循环直到直到一个不在该用户正样本中的负样本neg_item
         while True:
             neg_item = np.random.randint(0, dataset.m_items)
             if neg_item in pos_for_user:
                 continue
             else:
                 break
-
+        # 样本保存：将每个样本（用户、正样本、负样本）存储在samples列表中
         samples.append([user, pos_item, neg_item])
-
     return np.array(samples)
 
 

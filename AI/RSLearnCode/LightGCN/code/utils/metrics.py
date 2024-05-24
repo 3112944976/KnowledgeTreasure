@@ -35,6 +35,7 @@ def novelty(ground_truth, train_items_interacted_batch, topk):
     return novelty
 
 
+# 衡量推荐列表中推荐项目之间的平均距离：度量多样性
 def mean_intra_list_distance(recommendation_lists, item_embeddings):
     """
     Compute the mean intra-list distance (ILD) of recommended items.
@@ -62,6 +63,7 @@ def mean_intra_list_distance(recommendation_lists, item_embeddings):
     return torch.sum(ILDs).item()
 
 
+# r:[[user1_pred_item1_isTrue 1 also 0, ...], ...] test_data:[[user1_ground_items], ...]
 def recall_precision_at_k(test_data, r, k):
     """
     Compute the recall and precision at k.
@@ -154,27 +156,16 @@ def auc(all_item_scores, dataset, test_data):
     return roc_auc_score(r, test_item_scores)
 
 
+# 生成标签矩阵，指示预测列表中的每个项目是否存在于每个用户的真实列表中
+# [[user1_ground_items], ...]  [[user1_pred_k], ...]
 def get_label(test_data, pred_data):
-    """
-    Get the label matrix indicating whether an item is in the ground truth
-    list.
-
-    Args:
-        test_data (list): List of ground truth items for each user.
-        pred_data (numpy.ndarray): Array of predicted items.
-
-    Returns:
-        numpy.ndarray: The label matrix.
-    """
     r = []
-
     for i in range(len(test_data)):
-        ground_true = test_data[i]
-        predict_top_k = pred_data[i]
-
+        ground_true = test_data[i]  # [user1_ground_items]
+        predict_top_k = pred_data[i]  # [user1_pred_k]
+        # 列表pred包含布尔值，指示predict_top_k中的每个项目是否存在于ground_true中
         pred = list(map(lambda x: x in ground_true, predict_top_k))
+        # 将True转换为1.0，False转换为0.0
         pred = np.array(pred).astype("float")
-
         r.append(pred)
-
     return np.array(r).astype("float")

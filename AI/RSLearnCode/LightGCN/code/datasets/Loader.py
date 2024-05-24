@@ -7,6 +7,7 @@ import torch
 from time import time
 import scipy.sparse as sp
 from os.path import join
+import csv
 
 
 class Loader(BasicDataset):
@@ -32,6 +33,7 @@ class Loader(BasicDataset):
         self.test_data_size = 0
         self.config = config
         # 建个默认字典，存储训练数据的用户与物品交互情况 {user_id -> [item_ids]}
+        # 当尝试访问不存在的键时，会返回一个空列表作为默认值
         self.user_interactions_dict_train = defaultdict(list)
         # 打开训练文件，循环读取每一行数据并处理
         with open(train_file) as f:
@@ -101,16 +103,16 @@ class Loader(BasicDataset):
         # 构建用户-物品稀疏矩阵，并进行归一化处理
         self.user_item_net = csr_matrix(
             (
-                np.ones(len(self.train_user)),
-                (self.train_user, self.train_item)
+                np.ones(len(self.train_user)),  # 元素取值，取值为1且等长train_user的数组
+                (self.train_user, self.train_item)  # 元素位置，（user_id, item_id）
             ),
-            shape=(self.n_user, self.m_item)
+            shape=(self.n_user, self.m_item)  # 矩阵形状
         )
         # 分别计算用户和物品的度
         self.users_D = np.array(self.user_item_net.sum(axis=1)).squeeze()
-        self.users_D[self.users_D == 0.] = 1
+        self.users_D[self.users_D == 0.] = 1  # 若用户无交互项目，则度设置为1。
         self.items_D = np.array(self.user_item_net.sum(axis=0)).squeeze()
-        self.items_D[self.items_D == 0.] = 1.
+        self.items_D[self.items_D == 0.] = 1.  # 若项目无交互项目，则度设置为1。
         # 构建所有用户的正例项目列表，并构建测试字典
         self._allPos = self.get_user_pos_items(list(range(self.n_user)))
         self.__testDict = self.__build_test()
@@ -231,8 +233,7 @@ class Loader(BasicDataset):
     # 构建测试数据字典
     def __build_test(self):
         """
-        return:
-            dict: {user: [items]}
+        return:dict: {user: [items,], }
         """
         test_data = {}
 
@@ -243,7 +244,6 @@ class Loader(BasicDataset):
                 test_data[user].append(item)
             else:
                 test_data[user] = [item]
-
         return test_data
     # 获取用户-物品反馈
     def get_user_item_feedback(self, users, items):
@@ -270,16 +270,23 @@ class Loader(BasicDataset):
         return posItems
     # 根据交互数将用户分配到不同区间
     def distribute_users_into_bins_by_num_interactions(self, num_bins):
+        # 获得每个训练用户的对数化交互项目数
         log_values = [np.log(len(self.user_interactions_dict_train[user])) for user in self.user_interactions_dict_train.keys()]
-
-        # Create bins
-        min_num_interactions = min(log_values)
-        max_num_interactions = max(log_values)
+        min_num_interactions = min(log_values)  # 对数化后的最小交互物品数
+        max_num_interactions = max(log_values)  # 对数化后的最大交互物品数
+        # 在最小最大值间生成num_bins个均匀间隔的阈值，用于将用户分配到不同的箱子中
         bin_thresholds = np.linspace(min_num_interactions, max_num_interactions, num_bins)
-
-        # Assign users to a bin based on the number of items they interacted with
+        # 将对数化后的交互物品数量根据阈值分配到不同的箱子中
         bin_indices = np.digitize(log_values, bin_thresholds, right=True)
-
-        # Create a dictionary that maps users to bins
+        # 创建一个将用户映射到其所属箱子索引的字典，{user_id: bin_index, }
         user_bin_dict = dict(zip(self.user_interactions_dict_train.keys(), bin_indices))
+        # 结果保存
+        csv_file_path = 'user_bins.csv'
+        print("开始保存user_bin_dict")
+        with open(csv_file_path, 'w', newline='') as csvfile:
+            fieldnames = ['Key', 'Value']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for key, value in user_bin_dict.items():
+                writer.writerow({'Key': key, 'Value': value})
         return user_bin_dict

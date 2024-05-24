@@ -12,7 +12,7 @@ def train_pairwise(dataset, model, loss_class, optimizer):
         tuple: A tuple containing the average loss value and timing info.
     """
     model.train()
-    # 计时器，并从数据集中均匀地采样数据
+    # 计时器，并完成负样本采样工作
     with Timer(name="Sample"):
         samples = utils.uniform_sample_original(dataset)
     # 从采样中提取用户、正样本物品、负样本物品，并转换为tensor对象

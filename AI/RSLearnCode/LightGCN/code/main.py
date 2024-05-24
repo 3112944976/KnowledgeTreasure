@@ -118,15 +118,11 @@ def main():
         with tqdm(range(world.TRAIN_epochs), desc="Epoch") as pbar:
             for epoch in pbar:
                 # 模型训练，记录平均损失和采样时间
-                avg_loss, sampling_time = procedures.train_pairwise(
-                    dataset, model, criterion, optimizer)
+                avg_loss, sampling_time = procedures.train_pairwise(dataset, model, criterion, optimizer)
                 wandb.log({"BPR Loss": avg_loss, "Epoch": epoch})
-
                 # 每隔10个epoch，在验证集上对模型进行评估
                 if epoch % 10 == 0:
-                    test_metrics = procedures.eval_pairwise(
-                        dataset, model, world.config["multicore"])
-
+                    test_metrics = procedures.eval_pairwise(dataset, model, world.config["multicore"])
                     # 存储实验结果
                     results = {}
                     # 存储探索性分析结果: Metrics vs. Bin
@@ -155,29 +151,29 @@ def main():
                     # 使用 wandb.log 记录实验结果
                     wandb.log({**results, "Epoch": epoch})
 
-                    # 计算当前指标值是否超过历史最佳指标值。
-                    best_val = np.argmax(test_metrics[save_model_by])
-                    if test_metrics[save_model_by][best_val] > best_test_metric:
-                        # 如果当前指标值超过历史最佳指标值，则更新最佳指标值并保存模型
-                        best_test_metric = test_metrics[save_model_by][best_val]
-                        run_name = f"best_{save_model_by}"
-                        wandb.run.summary[run_name] = best_test_metric
-                        ckpt = {
-                            "state_dict": model.state_dict(),
-                            "optimizer_state_dict": optimizer.state_dict(),
-                            f"{run_name}@{max(world.topks)}": best_test_metric,
-                            "best_epoch": epoch
-                        }
-                        torch.save(ckpt, weight_file)
-                        if world.config["save_embs"]:
-                            for i, emb in enumerate(model.get_embedding_matrix().unbind(dim=1)):
-                                name_weight_file = os.path.basename(weight_file)
-                                torch.save(
-                                    emb,
-                                    os.path.join(
-                                        world.config["embs_path"],
-                                        f"emb_layer-{i}_{name_weight_file}")
-                                )
+                    # 计算当前指标值是否超过历史最佳指标值。(训练w-sdp-a-lgn模型时，需注释。)
+                    # best_val = np.argmax(test_metrics[save_model_by])
+                    # if test_metrics[save_model_by][best_val] > best_test_metric:
+                    #     # 如果当前指标值超过历史最佳指标值，则更新最佳指标值并保存模型
+                    #     best_test_metric = test_metrics[save_model_by][best_val]
+                    #     run_name = f"best_{save_model_by}"
+                    #     wandb.run.summary[run_name] = best_test_metric
+                    #     ckpt = {
+                    #         "state_dict": model.state_dict(),
+                    #         "optimizer_state_dict": optimizer.state_dict(),
+                    #         f"{run_name}@{max(world.topks)}": best_test_metric,
+                    #         "best_epoch": epoch
+                    #     }
+                    #     torch.save(ckpt, weight_file)
+                    #     if world.config["save_embs"]:
+                    #         for i, emb in enumerate(model.get_embedding_matrix().unbind(dim=1)):
+                    #             name_weight_file = os.path.basename(weight_file)
+                    #             torch.save(
+                    #                 emb,
+                    #                 os.path.join(
+                    #                     world.config["embs_path"],
+                    #                     f"emb_layer-{i}_{name_weight_file}")
+                    #             )
 
                 # 更新进度条的后缀信息，显示当前平均损失和采样时间
                 pbar.set_postfix({
