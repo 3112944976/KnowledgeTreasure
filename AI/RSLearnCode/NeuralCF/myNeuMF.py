@@ -91,7 +91,7 @@ def getNDCG(ranklist, gtItem):
 
 
 def eval_one_rating(idx):
-    """对testRatings中的一个用户样本进预测和评估"""
+    """对testRatings中的一个用户进行预测和评估"""
     rating = _testRatings[idx]
     items = _testNegatives[idx]
     u = rating[0]
