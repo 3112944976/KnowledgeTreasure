@@ -42,7 +42,7 @@ def parse_args():
     parser.add_argument('--adj_type', nargs='?', default='norm',
                         help='Specify the type of the adjacency (laplacian) matrix from {plain, norm, mean}.')
 
-    parser.add_argument('--gpu_id', type=int, default=0)  # 6
+    parser.add_argument('--gpu_id', type=int, default=2)
 
     parser.add_argument('--node_dropout_flag', type=int, default=1,
                         help='0: Disable node dropout, 1: Activate node dropout')

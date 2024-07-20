@@ -57,7 +57,7 @@ if __name__ == '__main__':
             mf_loss += batch_mf_loss
             emb_loss += batch_emb_loss
         # 在每10次周期之外，仅需打印训练信息并直接进入下一个训练周期即可，无需后续测试。
-        if (epoch + 1) % 3 != 0:
+        if (epoch + 1) % 1 != 0:
             if args.verbose > 0 and epoch % args.verbose == 0:
                 print('Epoch %d [%.1fs]: train_loss==%.4f' % (epoch, time() - t1, loss))
             continue
